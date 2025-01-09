@@ -6,11 +6,17 @@ using System.Threading.Tasks;
 
 namespace Musikhjalpen2
 {
-    public class Album(string Name, String Songs)
+    public class Album
     {
         public string Name { get; set; }
-        public List<string> Songs;
+        public List<Song> Songs { get; set; }
 
-        
+        public Album() { }
+        public Album(string name)
+        {
+            Name = name;
+            Songs = new List<Song>();
+        }
     }
+
 }

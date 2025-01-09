@@ -18,9 +18,15 @@ namespace Musikhjalpen2
     /// </summary>
     public partial class MainWindow : Window
     {
+        private SongHandler _songHandler;
+        private SongHandler songHandler;
+
+
         public MainWindow()
         {
             InitializeComponent();
+            _songHandler = new SongHandler(); // Skapa en instans av SongHandler
+            songHandler = new SongHandler();
         }
 
         int vote = 0;
@@ -59,18 +65,19 @@ namespace Musikhjalpen2
 
         private void btnWish_Click(object sender, RoutedEventArgs e)
         {
-            string wishedSong = txtboxWishSongNumber.Text;
+            if (double.TryParse(txtboxWishSongNumber.Text, out double wishedSong))
+            {
+                int wishSongNumber = (int)Math.Truncate(wishedSong);
+                MessageBox.Show($"Din röst på {wishedSong} har registrerats som {wishSongNumber}");
 
-            //double wishSongNumber = Convert.ToInt32(wishedSong); Försökte med en koverterare först men det funkade inte
-
-            int wishSongNumber = (int)Math.Truncate(double.Parse(wishedSong.ToString())); //Hittade Math.Trancute på https://stackoverflow.com/questions/47866486/convert-object-to-int-without-rounding
-
-            MessageBox.Show($"Din röst på {wishedSong} har registrerats som {wishSongNumber}");
-
-            song = wishSongNumber;
-            vote++;
-            if (wishedSong != null) //Om wishedSong inte är tom så ska den lägga till värdet i _wishlist. FUnkar dock inte än
-                {_wishlist.Add(song); }
+                song = wishSongNumber;
+                vote++;
+                _wishlist.Add(song);
+            }
+            else
+            {
+                MessageBox.Show("Ogiltig inmatning! Vänligen ange ett giltigt nummer.");
+            }
         }
 
         private void btnVisaSaldo_Click(object sender, RoutedEventArgs e)
@@ -79,29 +86,32 @@ namespace Musikhjalpen2
             MessageBox.Show($"Du har röstat på {vote}st låtar. Det har get {vote * saldo}kr till Musikhjälpen"); //Inte helt nöjd med vote*saldo här. Det går nog att göra snyggare. Men det funkar för detta.
         }
 
-        private int StringToValueConverter()
+        private int StringToValueConverter(string input)
         {
-            string value = txtboxWishSongNumber.Text; // Tog inspiration här https://code-maze.com/csharp-find-index-of-value-in-string-array/
-            int index = Array.IndexOf(numbers, value);
-            return index;
+            input = input.ToLower(); // Konvertera till små bokstäver
+            int index = Array.IndexOf(numbers, input); // Hitta index
+            return index + 1; // Lägg till 1 för att få rätt nummer
         }
 
-        private int StringToValueConverter2()
-        {
-            {
-                string value = txtboxWishSongNumber.Text;
-                string trimmed = value.TrimStart(); //Oklart om denna metod får användas. Den tar bort whitespaces. Hittades här: https://kodify.net/csharp/strings/remove-whitespace/
-                int index = Array.IndexOf(numbers, trimmed);
-                /*string[] index = Array.ConvertAll(value.Split(','), p => p.Trim());*/ //Denna är ifrån https://stackoverflow.com/questions/1977340/perform-trim-while-using-split
-                return index; //Får dock inte dessa att prata med btnTextToSpeech_Click nedan
-            }
-        }
+
 
         private void btnTextToSpeech_Click(object sender, RoutedEventArgs e)
         {
-            StringToValueConverter();
-            StringToValueConverter2();
-            
+            // Tre exempel på anrop
+            int value1 = StringToValueConverter("hundratjugofem");
+            int value2 = StringToValueConverter("ett");
+            int value3 = StringToValueConverter("tvåhundratio");
+
+            // Visa resultaten i en MessageBox
+            MessageBox.Show($"Konverterade värden:\n125 ➞ {value1}\n1 ➞ {value2}\n210 ➞ {value3}");
+
+            // Testa med textrutan
+            string userInput = txtboxWishSongNumber.Text;
+            if (!string.IsNullOrWhiteSpace(userInput))
+            {
+                int userValue = StringToValueConverter(userInput);
+                MessageBox.Show($"Inmatningen '{userInput}' konverterades till {userValue}");
+            }
         }
 
         private void FindMostVotedSong()
@@ -118,45 +128,93 @@ namespace Musikhjalpen2
             FindMostVotedSong();
             
         }
-            //Påbörjat bonusuppgiften
-            string[] names = {
-            "Brita Zackari", "Christer Lundberg", "Daniel Adams-Ray",
-            "Ehsan Noroozi", "Emil Hansius", "Emma Knyckare",
-            "Farah Abadi", "Felix Sandman", "Gina Dirawi",
-            "Jason Diakité", "Jason Diakitée", "Kalle Zackari Wahlström",
-            "Klas Eriksson", "Kodjo Akolor", "Linnea Henriksson",
-            "Little Jinder", "Martina Thun", "Molly Sandén",
-            "Nour El Refai", "Oscar Zia", "Sarah Dawn Finer",
-            "Sofia Dalén", "Tina Mehrafzoon", "Kitty Jutbring",
-            "William Spetz", "Ametist Azordegan", "Anis Don Demina",
-            "Assia Dahir", "Daniel Hallberg", "Henrik Torehammar",
-            "Howlin' Pelle", "Linnea Henriksson", "Linnéa Wikblad",
-            "Miriam Bryant", "Petter Askergren"
-            };
-
+            
         public void GetAllArtists()
         {
-            string allTheArtists = Name.Artist; //har ingen aning om jag ska kunna filtrera ut bara artisterna ur SongHandler. Uppgift 7
+            int songNumber;
+            if (int.TryParse(txtboxWishSongNumber.Text, out songNumber))
+            {
+                bool found = false;
+
+                // Hämta artister via SongHandler
+                var songHandler = new SongHandler();
+                var artists = songHandler.GetArtists(); // Hämta listan över artister
+
+                // Sök igenom alla artister och deras album
+                foreach (var artist in artists)
+                {
+                    foreach (var album in artist.Albums)
+                    {
+                        foreach (var song in album.Songs)
+                        {
+                            if (song.Number == songNumber)
+                            {
+                                MessageBox.Show($"Röst registrerad för låten: {song.Name}");
+                                song.Votes++;  // Öka röster för den valda låten
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (found) break;
+                    }
+
+                    if (found) break;
+                }
+
+                if (!found)
+                {
+                    MessageBox.Show("Hittade ingen låt med det numret.");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Ogiltigt nummer.");
+            }
         }
 
         private void btnGetAllArtists_Click(object sender, RoutedEventArgs e)
         {
-            GetAllArtists();
+            SongHandler songHandler = new SongHandler();
+            songHandler.AssignUniqueSongNumbers(); // Tilldela unika låtnummer
+
+            MessageBox.Show("Låtnummer har tilldelats!");
         }
 
-        public void btnArtist_Click(object sender, RoutedEventArgs e)
+        private void btnArtist_Click(object sender, RoutedEventArgs e)
         {
-            GetArtistByAlbum(); //Metoden ligger i Songhandler och vill inte prata med denna klass. Alla rekommendation jag hittar på google säger att jag ska flytta
-        }                       //den till den här klassen, vilket vi inte får göra. CS0103
+            string albumName = txtboxWishSongNumber.Text; // Hämta albumnamnet från TextBox
 
-        public void GetMostPopularArtist()
+            SongHandler songHandler = new SongHandler(); // Skapa ett objekt av SongHandler
+            string artistName = songHandler.GetArtistNameByAlbum(albumName); // Hitta artisten
+
+            MessageBox.Show(artistName); // Visa resultatet i en MessageBox
+        }                //den till den här klassen, vilket vi inte får göra. CS0103
+
+        private void btnMostPopularArtist_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                // Anropa metoden från SongHandler
+                Artist mostPopularArtist = songHandler.GetMostPopularArtist();
 
+                // Visa resultatet i en MessageBox
+                if (mostPopularArtist != null)
+                {
+                    MessageBox.Show($"Den mest populära artisten är {mostPopularArtist.Name} med totalt flest röster!");
+                }
+                else
+                {
+                    MessageBox.Show("Kunde inte hitta någon artist.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Fånga och visa eventuella fel för att felsöka
+                MessageBox.Show($"Ett fel inträffade: {ex.Message}");
+            }
         }
 
-        private void btnMostPopularArtist_Click(object sender, RoutedEventArgs e) //Uppgift 10
-        {
-            GetMostPopularArtist();
-        }
+
     }
 }

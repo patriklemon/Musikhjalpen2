@@ -136,18 +136,97 @@ namespace Musikhjalpen2
 
          };
         #endregion
-        public void GetArtistNameByAlbum()
-        {
-            foreach(Album alb in _artists)
-            {
-                if(txtboxWishSongNumber.Text == alb)
-                {
-                    alb.Show()
+        //public string GetArtistNameByAlbum(string albumName)
+        //{
+        //    foreach (var artist in _artists)
+        //    {
+        //        foreach (var album in artist.Albums)
+        //        {
+        //            if (album.Name == albumName)
+        //            {
+        //                return artist.Name; // Returnerar artistens namn om albumet finns
+        //            }
+        //        }
+        //    }
 
+        //    return "Hittade inget album"; // Om albumet inte hittas
+        //}
+        // Anropa den statiska metoden från Song för att tilldela unika låtnummer
+        public SongHandler()
+        {
+            // Tilldela unika låtnummer när instansen skapas
+            Song.AssignUniqueSongNumbers(_artists);
+            AssignUniqueSongNumbers();
+        }
+        public List<Artist> GetArtists()
+        {
+            return _artists;
+        }
+        public string GetArtistNameByAlbum(string albumName)
+        {
+            foreach (var artist in _artists)
+            {
+                foreach (var album in artist.Albums)
+                {
+                    if (album.Name.Equals(albumName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return artist.Name; // Returnerar artistens namn
+                    }
+                }
+            }
+            return "Hittade inget album"; // Om albumet inte finns
+        }
+        public void AssignUniqueSongNumbers()
+        {
+            int songNumber = 1; // Starta numreringen från 1
+
+            // Iterera genom alla artister
+            foreach (var artist in _artists)
+            {
+                // Iterera genom albumen för varje artist
+                foreach (var album in artist.Albums)
+                {
+                    // Iterera genom låtarna för varje album
+                    foreach (var song in album.Songs)
+                    {
+                        // Tilldela ett unikt nummer till varje låt
+                        song.Number = songNumber;
+                        songNumber++; // Öka numret för nästa låt
+                    }
                 }
             }
         }
+        public Artist GetMostPopularArtist()
+        {
+            Artist mostPopularArtist = null;
+            int highestVotes = 0;
+
+            foreach (var artist in _artists)
+            {
+                int totalVotes = 0;
+
+                // Summera röster för alla låtar för varje artist
+                foreach (var album in artist.Albums)
+                {
+                    foreach (var song in album.Songs)
+                    {
+                        totalVotes += song.Votes;
+                    }
+                }
+
+                // Kontrollera om denna artist har fler röster än det nuvarande högsta
+                if (totalVotes > highestVotes)
+                {
+                    highestVotes = totalVotes;
+                    mostPopularArtist = artist;
+                }
+            }
+
+            return mostPopularArtist;
+        }
+
+
+
     }
 
-    
 }
