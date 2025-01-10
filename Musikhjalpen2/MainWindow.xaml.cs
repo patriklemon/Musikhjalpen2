@@ -18,15 +18,16 @@ namespace Musikhjalpen2
     /// </summary>
     public partial class MainWindow : Window
     {
-        private SongHandler _songHandler;
+        private SongHandler _songHandler; // Instanser av SongHandler, som ansvarar för att hantera låtar och artister.
         private SongHandler songHandler;
 
 
         public MainWindow()
         {
             InitializeComponent();
-            _songHandler = new SongHandler(); // Skapa en instans av SongHandler
-            songHandler = new SongHandler();
+            _songHandler = new SongHandler(); // Skapa en instans av SongHandler för intern användning.
+            songHandler = new SongHandler(); // Skapa en separat instans (redundant här).
+
         }
 
         int vote = 0;
@@ -63,11 +64,11 @@ namespace Musikhjalpen2
                  "tvåhundra", "tvåhundraett", "tvåhundratvå", "tvåhundratre", "tvåhundrafyra", "tvåhundrafem", "tvåhundrasex", "tvåhundrasju", "tvåhundraåtta", "tvåhundranio","tvåhundratio"
         };
 
-        private void btnWish_Click(object sender, RoutedEventArgs e)
+        private void btnWish_Click(object sender, RoutedEventArgs e) // Hanterar önskelistan när användaren trycker på knappen Önska
         {
             if (double.TryParse(txtboxWishSongNumber.Text, out double wishedSong))
             {
-                int wishSongNumber = (int)Math.Truncate(wishedSong);
+                int wishSongNumber = (int)Math.Truncate(wishedSong); //https://learn.microsoft.com/en-us/dotnet/api/system.math.truncate?view=net-9.0
                 MessageBox.Show($"Din röst på {wishedSong} har registrerats som {wishSongNumber}");
 
                 song = wishSongNumber;
@@ -86,18 +87,18 @@ namespace Musikhjalpen2
             MessageBox.Show($"Du har röstat på {vote}st låtar. Det har get {vote * saldo}kr till Musikhjälpen"); //Inte helt nöjd med vote*saldo här. Det går nog att göra snyggare. Men det funkar för detta.
         }
 
-        private int StringToValueConverter(string input)
+        private int StringToValueConverter(string input) //Konverterar en textrepresentation av ett nummer till motsvarande heltalsvärde.
         {
-            input = input.ToLower(); // Konvertera till små bokstäver
+            input = input.ToLower(); // konvertera till små bokstäver
             int index = Array.IndexOf(numbers, input); // Hitta index
             return index + 1; // Lägg till 1 för att få rätt nummer
         }
 
 
 
-        private void btnTextToSpeech_Click(object sender, RoutedEventArgs e)
+        private void btnTextToSpeech_Click(object sender, RoutedEventArgs e) //konvertering av text till nummer
         {
-            // Tre exempel på anrop
+            
             int value1 = StringToValueConverter("hundratjugofem");
             int value2 = StringToValueConverter("ett");
             int value3 = StringToValueConverter("tvåhundratio");
@@ -117,10 +118,10 @@ namespace Musikhjalpen2
         private void FindMostVotedSong()
         {
             int[] mostVotedSongs = new int[100];
-            int maxValue = mostVotedSongs.Max();
-            int maxIndex = mostVotedSongs.ToList().IndexOf(maxValue);
+            int maxValue = mostVotedSongs.Max(); // Hitta maxvärdet i arrayen
+            int maxIndex = mostVotedSongs.ToList().IndexOf(maxValue); // visar index av maxvärdet
 
-            MessageBox.Show($"Du vill allra helst höra låt nummer {maxValue}"); //Detta funkar inte men det syns kanske vad jag försökt göra. Får bara värde 0 då _wishlist troligen inte tar emot värde.
+            MessageBox.Show($"Du vill allra helst höra låt nummer {maxValue}");
         }
 
         private void btnMostPopularSong_Click(object sender, RoutedEventArgs e)
@@ -129,18 +130,18 @@ namespace Musikhjalpen2
             
         }
             
-        public void GetAllArtists()
+        public void GetAllArtists() // hämtar alla artister och söker efter specifika låtar baserat på inmatning
         {
             int songNumber;
             if (int.TryParse(txtboxWishSongNumber.Text, out songNumber))
             {
                 bool found = false;
 
-                // Hämta artister via SongHandler
+                // hämtar artister via SongHandler
                 var songHandler = new SongHandler();
                 var artists = songHandler.GetArtists(); // Hämta listan över artister
 
-                // Sök igenom alla artister och deras album
+                // söker igenom alla artister och deras album
                 foreach (var artist in artists)
                 {
                     foreach (var album in artist.Albums)
@@ -150,7 +151,7 @@ namespace Musikhjalpen2
                             if (song.Number == songNumber)
                             {
                                 MessageBox.Show($"Röst registrerad för låten: {song.Name}");
-                                song.Votes++;  // Öka röster för den valda låten
+                                song.Votes++;  // ökar röster för den valda låten
                                 found = true;
                                 break;
                             }
@@ -176,7 +177,7 @@ namespace Musikhjalpen2
         private void btnGetAllArtists_Click(object sender, RoutedEventArgs e)
         {
             SongHandler songHandler = new SongHandler();
-            songHandler.AssignUniqueSongNumbers(); // Tilldela unika låtnummer
+            songHandler.AssignUniqueSongNumbers(); // tilldela unika låtnummer
 
             MessageBox.Show("Låtnummer har tilldelats!");
         }

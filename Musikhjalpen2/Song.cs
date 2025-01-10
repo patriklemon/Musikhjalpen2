@@ -23,7 +23,7 @@ namespace Musikhjalpen2
         {
             int songNumber = 1; // Starta numreringen från 1
 
-            // Gå igenom alla artister, deras album och deras låtar
+            // går igenom alla artister, deras album och deras låtar
             foreach (var artist in artists)
             {
                 foreach (var album in artist.Albums)

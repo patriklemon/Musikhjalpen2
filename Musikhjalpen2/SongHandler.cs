@@ -136,7 +136,7 @@ namespace Musikhjalpen2
 
          };
         #endregion
-        //public string GetArtistNameByAlbum(string albumName)
+        //public string GetArtistNameByAlbum(string albumName) Detta var en kod jag började på men som inte fungerade senare med uppgift 10
         //{
         //    foreach (var artist in _artists)
         //    {
@@ -151,10 +151,9 @@ namespace Musikhjalpen2
 
         //    return "Hittade inget album"; // Om albumet inte hittas
         //}
-        // Anropa den statiska metoden från Song för att tilldela unika låtnummer
         public SongHandler()
         {
-            // Tilldela unika låtnummer när instansen skapas
+            // tilldelar unika låtnummer när instansen skapas
             Song.AssignUniqueSongNumbers(_artists);
             AssignUniqueSongNumbers();
         }
@@ -170,28 +169,28 @@ namespace Musikhjalpen2
                 {
                     if (album.Name.Equals(albumName, StringComparison.OrdinalIgnoreCase))
                     {
-                        return artist.Name; // Returnerar artistens namn
+                        return artist.Name; // returnerar artistens namn
                     }
                 }
             }
-            return "Hittade inget album"; // Om albumet inte finns
+            return "Hittade inget album"; // om inmatning är fel
         }
         public void AssignUniqueSongNumbers()
         {
-            int songNumber = 1; // Starta numreringen från 1
+            int songNumber = 1; // startar från 1
 
-            // Iterera genom alla artister
+            // går igenom alla artister
             foreach (var artist in _artists)
             {
-                // Iterera genom albumen för varje artist
+                // går igenom albumen för varje artist
                 foreach (var album in artist.Albums)
                 {
-                    // Iterera genom låtarna för varje album
+                    // går igenom låtarna för varje album
                     foreach (var song in album.Songs)
                     {
-                        // Tilldela ett unikt nummer till varje låt
+                        // tilldela ett unikt nummer till varje låt
                         song.Number = songNumber;
-                        songNumber++; // Öka numret för nästa låt
+                        songNumber++; // går till nästa låt efter att den är klar på kodraden innan
                     }
                 }
             }
